@@ -2,11 +2,7 @@
 # vim: ft=sls
 
 {%- set tplroot = tpldir.split('/')[0] %}
-{%- set sls_config_file = tplroot ~ '.config.file' %}
 {%- from tplroot ~ "/map.jinja" import apache with context %}
-
-include:
-  - {{ sls_config_file }}
 
 apache-service-running:
   {%- if salt['pillar.get']('apache:manage_service_states', True) %}
@@ -14,8 +10,6 @@ apache-service-running:
   service.running:
     - name: {{ apache.service.name }}
     - enable: True
-    - watch:
-      - sls: {{ sls_config_file }}
     - retry: {{ apache.retry_option|json }}
   cmd.run:
     - names:
@@ -39,10 +33,7 @@ apache-service-running-restart:
     - cmd: {{ apache.custom_reload_command|default('apachectl graceful') }}
     - python_shell: True
          {%- endif %}
-    - watch:
-      - sls: {{ sls_config_file }}
     - require:
-      - sls: {{ sls_config_file }}
       - service: apache-service-running
 
 apache-service-running-reload:
@@ -55,8 +46,5 @@ apache-service-running-reload:
     - cmd: {{ apache.custom_reload_command|default('apachectl graceful') }}
     - python_shell: True
          {%- endif %}
-    - watch:
-      - sls: {{ sls_config_file }}
     - require:
-      - sls: {{ sls_config_file }}
       - service: apache-service-running
