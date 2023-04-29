@@ -3,12 +3,10 @@
 
 {%- set tplroot = tpldir.split('/')[0] %}
 {%- set sls_config_file = tplroot ~ '.config.file' %}
-{%- set sls_config_registersite = tplroot ~ '.config.register_site' %}
 {%- from tplroot ~ "/map.jinja" import apache with context %}
 
 include:
   - {{ sls_config_file }}
-  - {{ sls_config_registersite }}
 
 apache-service-running:
   {%- if salt['pillar.get']('apache:manage_service_states', True) %}
