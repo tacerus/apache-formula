@@ -30,10 +30,6 @@ apache-config-vhosts-standard-{{ id }}:
     - require:
       - pkg: apache-package-install-pkg-installed
     - watch_in:
-      - module: apache-service-running-reload
-    - require_in:
-      - module: apache-service-running-restart
-      - module: apache-service-running-reload
       - service: apache-service-running
 
       {%- if site.get('DocumentRoot') != False %}
@@ -57,10 +53,6 @@ apache-config-vhosts-standard-{{ id }}-cmd-run-a2en:
     - require:
       - file: apache-config-vhosts-standard-{{ id }}
     - watch_in:
-      - module: apache-service-running-reload
-    - require_in:
-      - module: apache-service-running-restart
-      - module: apache-service-running-reload
       - service: apache-service-running
 
           {%- else %}
@@ -72,10 +64,6 @@ apache-config-vhosts-standard-{{ id }}-cmd-run-a2dis:
     - require:
       - file: apache-config-vhosts-standard-{{ id }}
     - watch_in:
-      - module: apache-service-running-reload
-    - require_in:
-      - module: apache-service-running-restart
-      - module: apache-service-running-reload
       - service: apache-service-running
 
           {%- endif %}
