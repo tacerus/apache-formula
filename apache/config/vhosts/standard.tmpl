@@ -45,32 +45,32 @@
 
 <VirtualHost {%- for intf in vals.interfaces %} {{ intf }}:{{ vals.port }}{% endfor -%}>
     ServerName {{ vals.ServerName }}
-    {%- if site.get('ServerAlias') != False %}ServerAlias {{ vals.ServerAlias }}{% endif %}
+    {% if site.get('ServerAlias') != False %}ServerAlias {{ vals.ServerAlias }}{% endif %}
 
-    {%- if site.get('ServerAdmin') != False %}ServerAdmin {{ vals.ServerAdmin }}{% endif %}
+    {% if site.get('ServerAdmin') != False %}ServerAdmin {{ vals.ServerAdmin }}{% endif %}
 
-    {%- if site.get('DirectoryIndex') -%}DirectoryIndex {{ vals.DirectoryIndex }}{% endif %}
-    {%- if site.get('UseCanonicalName') -%}UseCanonicalName {{ vals.UseCanonicalName }}{% endif %}
-    {%- if site.get('AllowEncodedSlashes') != False -%}AllowEncodedSlashes {{ vals.AllowEncodedSlashes }}{% endif %}
+    {% if site.get('DirectoryIndex') -%}DirectoryIndex {{ vals.DirectoryIndex }}{% endif %}
+    {% if site.get('UseCanonicalName') -%}UseCanonicalName {{ vals.UseCanonicalName }}{% endif %}
+    {% if site.get('AllowEncodedSlashes') != False -%}AllowEncodedSlashes {{ vals.AllowEncodedSlashes }}{% endif %}
 
-    {%- if site.get('LogLevel') != False -%}LogLevel {{ vals.LogLevel }}{% endif %}
-    {%- if site.get('ErrorLog') != False -%}ErrorLog {{ vals.ErrorLog }}{% endif %}
-    {%- if site.get('LogFormat') != False -%}LogFormat {{ vals.LogFormat }}{% endif %}
-    {%- if site.get('CustomLog') != False -%}CustomLog {{ vals.CustomLog }}  {{ vals.LogFormat }}{% endif %}
+    {% if site.get('LogLevel') != False -%}LogLevel {{ vals.LogLevel }}{% endif %}
+    {% if site.get('ErrorLog') != False -%}ErrorLog {{ vals.ErrorLog }}{% endif %}
+    {% if site.get('LogFormat') != False -%}LogFormat {{ vals.LogFormat }}{% endif %}
+    {% if site.get('CustomLog') != False -%}CustomLog {{ vals.CustomLog }}  {{ vals.LogFormat }}{% endif %}
 
-    {%- if site.get('DocumentRoot') != False -%}DocumentRoot {{ vals.DocumentRoot }}{% endif %}
-    {%- if site.get('VirtualDocumentRoot') -%}VirtualDocumentRoot {{ vals.VirtualDocumentRoot }}{% endif %}
+    {% if site.get('DocumentRoot') != False -%}DocumentRoot {{ vals.DocumentRoot }}{% endif %}
+    {% if site.get('VirtualDocumentRoot') -%}VirtualDocumentRoot {{ vals.VirtualDocumentRoot }}{% endif %}
 
-    {%- if site.get('Timeout') != False and site.get('Timeout') != None %}Timeout {{ vals.Timeout }}{% endif %}
-    {%- if site.get('LimitRequestFields') %}LimitRequestFields {{ vals.LimitRequestFields }}{% endif %}
+    {% if site.get('Timeout') != False and site.get('Timeout') != None %}Timeout {{ vals.Timeout }}{% endif %}
+    {% if site.get('LimitRequestFields') %}LimitRequestFields {{ vals.LimitRequestFields }}{% endif %}
 
-    {%- if site.get('SSLCertificateFile') %}SSLEngine on
+    {% if site.get('SSLCertificateFile') %}SSLEngine on
     SSLCertificateFile {{ site.SSLCertificateFile }}
-    {%- if site.get('SSLCertificateKeyFile') %}SSLCertificateKeyFile {{ site.SSLCertificateKeyFile }}{% endif %}
-    {%- if site.get('SSLCertificateChainFile') %}SSLCertificateChainFile {{ site.SSLCertificateChainFile }}{% endif %}
+    {% if site.get('SSLCertificateKeyFile') %}SSLCertificateKeyFile {{ site.SSLCertificateKeyFile }}{% endif %}
+    {% if site.get('SSLCertificateChainFile') %}SSLCertificateChainFile {{ site.SSLCertificateChainFile }}{% endif %}
     {%- endif %}
 
-    {%- if site.get('Rewrite') %}RewriteEngine on
+    {% if site.get('Rewrite') %}RewriteEngine on
     {{ site.Rewrite|indent(4) }}
     {%- endif %}
 
@@ -109,7 +109,7 @@
         {{ dir.Formula_Append|indent(8) }}
         {%- endif %}
     </Directory>
-    {% endfor %}
+    {%- endfor %}
 
     {%- for path, loc in site.get('Location', {}).items() %}
     {%- set lvals = {
@@ -121,18 +121,18 @@
 
     <Location "{{ path }}">
         {%- if map.version == '2.4' %}
-        {%- if lvals.get('Require') != False %}Require {{ lvals.Require }}{% endif %}
+        {% if lvals.get('Require') != False %}Require {{ lvals.Require }}{% endif %}
         {%- else %}
-        {%- if lvals.get('Order') != False %}Order {{ lvals.Order }}{% endif %}
-        {%- if lvals.get('Allow') != False %}Allow {{ lvals.Allow }}{% endif %}
+        {% if lvals.get('Order') != False %}Order {{ lvals.Order }}{% endif %}
+        {% if lvals.get('Allow') != False %}Allow {{ lvals.Allow }}{% endif %}
         {%- endif %}
-        {%- if lvals.get('Dav') != False %}Dav On{% endif %}
+        {% if lvals.get('Dav') != False %}Dav On{% endif %}
 
         {%- if loc.get('Formula_Append') %}
         {{ loc.Formula_Append|indent(8) }}
         {%- endif %}
     </Location>
-    {% endfor %}
+    {%- endfor %}
 
     {%- if site.get('Formula_Append') %}
     {{ site.Formula_Append|indent(4) }}
