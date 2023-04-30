@@ -9,8 +9,3 @@ apache-service-running:
     - name: {{ apache.service.name }}
     - enable: True
     - reload: True
-  cmd.run:
-    - names:
-      - journalctl -xe -u {{ apache.service.name }} || true
-    - onfail:
-      - service: apache-service-running
