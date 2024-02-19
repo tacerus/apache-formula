@@ -9,17 +9,17 @@
     'port': site.get('port', '80'),
 
     'ServerName': sitename,
-    'ServerAlias': site.get('ServerAlias', ''),
+    'ServerAlias': site.get('ServerAlias', False),
 
-    'ServerAdmin': site.get('ServerAdmin', 'webmaster@{0}'.format(sitename)),
+    'ServerAdmin': site.get('ServerAdmin', False),
 
     'DirectoryIndex': site.get('DirectoryIndex'),
     'UseCanonicalName': site.get('UseCanonicalName'),
     'AllowEncodedSlashes': site.get('AllowEncodedSlashes', 'Off'),
 
-    'LogLevel': site.get('LogLevel', 'warn'),
+    'LogLevel': site.get('LogLevel', False),
     'ErrorLog': site.get('ErrorLog', '{0}/{1}-error.log'.format(map.logdir, sitename)),
-    'LogFormat': site.get('LogFormat', '"%h %l %u %t \\\"%r\\\" %>s"'),
+    'LogFormat': site.get('LogFormat', False),
     'CustomLog': site.get('CustomLog', '{0}/{1}-access.log'.format(map.logdir, sitename)),
 
     'DocumentRoot': site.get('DocumentRoot', '{0}/{1}'.format(map.wwwdir, sitename)),
