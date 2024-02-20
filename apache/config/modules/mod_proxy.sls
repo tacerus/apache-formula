@@ -10,20 +10,23 @@ include:
   - {{ sls_service_running }}
   - {{ sls_package_install }}
 
-    {%- if grains['os_family'] in ('Suse', 'Debian',) %}
+    {%- if grains['os_family'] == 'Suse' %}
+
+{%- if salt['cmd.retcode']('a2enmod -q proxy') == 1 %}
+extend:
+  apache-service-running:
+    service:
+      - reload: False
+{%- endif %}
 
 apache-config-modules-proxy-pkg:
   cmd.run:
     - name: a2enmod proxy
-    - unless: ls {{ apache.moddir }}/proxy.load || egrep "^APACHE_MODULES=" /etc/sysconfig/apache2 | grep ' proxy'
+    - unless: a2enmod -q proxy
     - order: 225
     - require:
       - pkg: apache-package-install-pkg-installed
     - watch_in:
-      - module: apache-service-running-restart
-    - require_in:
-      - module: apache-service-running-restart
-      - module: apache-service-running-reload
       - service: apache-service-running
 
     {%- elif grains['os_family']=="FreeBSD" %}
