@@ -1,0 +1,145 @@
+{{ pillar.get('managed_by_salt', '# Managed by the Apache formula') }}
+
+{%- set sitename = site.get('ServerName', id) -%}
+{%- set vals = {
+    'interfaces': site.get('interface', '*').split(),
+    'port': site.get('port', '80'),
+    'ErrorLog': site.get('ErrorLog', '{0}/{1}-error.log'.format(map.logdir, id)),
+    'CustomLog': site.get('CustomLog', '{0}/{1}-access.log'.format(map.logdir, id)),
+    'LogFormat': site.get('LogFormat', 'combined'),
+    'Directory_default': site.get('DocumentRoot', '{0}/{1}'.format(map.wwwdir, sitename)),
+} -%}
+
+<VirtualHost {%- for intf in vals.interfaces %} {{ intf }}:{{ vals.port }}{% endfor -%}>
+    ServerName {{ sitename }}
+
+    {%- for option in [
+          'ServerAlias',
+          'ServerAdmin',
+          'Timeout',
+          'LimitRequestFields',
+          'DocumentRoot',
+          'DirectoryIndex',
+          'UseCanonicalName',
+          'AllowEncodedSlashes',
+          'EnableSendfile',
+          'LogLevel',
+        ]
+    %}
+    {%- if option in site %}
+    {{ option }} {{ site[option] }}
+    {%- endif %}
+    {%- endfor %}
+    CustomLog {{ vals.CustomLog }} {{ vals.LogFormat }}
+    ErrorLog {{ vals.ErrorLog }}
+
+    {%- if 'SSLCertificateFile' in site %}
+    SSLEngine on
+    SSLCertificateFile {{ site.SSLCertificateFile }}
+    {%- endif %}
+    {%- if 'SSLCertificateKeyFile' in site %}
+    SSLCertificateKeyFile {{ site.SSLCertificateKeyFile }}
+    {%- endif %}
+    {%- if 'SSLProxyEngine' in site and site['SSLProxyEngine'] %}
+    SSLProxyEngine on
+    {%- endif %}
+
+    {%- if site.get('Rewrite') %}
+    RewriteEngine on
+    {{ site.Rewrite|indent(4) }}
+    {%- endif %}
+
+    {%- for key, value in site.get('SetEnvs', {}).items() %}
+    SetEnv {{ key }} {{ value }}
+    {%- endfor %}
+
+    {%- for env in site.get('SetEnvIfs', []) %}
+    SetEnvIf {{ env.attribute }} "{{ env.regex }}" {{ env.variables }}
+    {%- endfor %}
+
+    {%- for loc, path in site.get('Alias', {}).items() %}
+    Alias {{ loc }} {{ path }}
+    {%- endfor %}
+
+    {%- for path, dir in site.get('Directory', {}).items() %}
+    {%- if path == 'default' %}
+    {%- set path = vals.Directory_default %}
+    {%- endif %}
+    <Directory "{{ path }}">
+        {%- for option in [
+              'AddType'
+              'AllowOverride',
+              'DirectoryIndex',
+              'IndexOrderDefault',
+              'Options',
+              'Require',
+            ]
+        %}
+        {%- if option in dir %}
+        {{ option }} {{ dir[option] }}
+        {%- endif %}
+        {%- endfor %}
+        {%- if 'Formula_Append' in dir %}
+        {{ dir.Formula_Append|indent(8) }}
+        {%- endif %}
+    </Directory>
+    {%- endfor %}
+
+    {%- for block in ['Location', 'LocationMatch'] %}
+    {%- for path, loc in site.get(block, {}).items() %}
+    <{{ block }} "{{ path }}">
+        {%- for option in [
+              'ProxyPassMatch',
+              'Require',
+            ]
+        %}
+        {%- if option in loc %}
+        {{ option }} {{ loc[option] }}
+        {%- endif %}
+        {%- endfor %}
+        {%- if 'Formula_Append' in loc %}
+        {{ loc.Formula_Append|indent(8) }}
+        {%- endif %}
+    </{{ block }}>
+    {%- endfor %}
+    {%- endfor %}
+
+    {%- for option in [
+          'ProxyRequests',
+          'ProxyPreserveHost',
+        ]
+    %}
+    {%- if option in site %}
+    {{ option }} {{ site[option] }}
+    {%- endif %}
+    {%- endfor %}
+
+    {%- for proxy in site.get('ProxyRoute', {}) %}
+    {%- set proxyvals = {
+        'ProxyPassSource': proxy.get('ProxyPassSource', '/'),
+        'ProxyPassTarget': proxy.get('ProxyPassTarget', 'https://{0}'.format(sitename)),
+        'ProxyPassTargetOptions': proxy.get('ProxyPassTargetOptions', False),
+    } %}
+    {%- do proxyvals.update({
+        'ProxyPassReverseSource': proxy.get('ProxyPassReverseSource', proxyvals.ProxyPassSource),
+        'ProxyPassReverseTarget': proxy.get('ProxyPassReverseTarget', proxyvals.ProxyPassTarget),
+    }) %}
+    ProxyPass         {{ proxyvals.ProxyPassSource }} {{ proxyvals.ProxyPassTarget }}{{ ' ' ~ proxyvals.ProxyPassTargetOptions if proxyvals.ProxyPassTargetOptions else '' }}
+    ProxyPassReverse  {{ proxyvals.ProxyPassReverseSource }} {{ proxyvals.ProxyPassReverseTarget }}
+    {%- endfor %}
+
+    {%- for include_type in ['Include', 'IncludeOptional'] %}
+    {%- set includes = site.get(include_type, []) %}
+    {%- if includes is string %}
+    {{ include_type }} {{ includes }}
+    {%- elif includes is iterable %}
+    {%- for include in includes %}
+    {{ include_type }} {{ include }}
+    {%- endfor %}
+    {%- endif %}
+    {%- endfor %}
+
+    {%- if 'Formula_Append' in site %}
+    {{ site.Formula_Append|indent(4) }}
+    {%- endif %}
+</VirtualHost>

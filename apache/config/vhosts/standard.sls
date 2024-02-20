@@ -21,7 +21,7 @@ include:
 apache-config-vhosts-standard-{{ id }}:
   file.managed:
     - name: {{ apache.vhostdir }}/{{ id }}{{ apache.confext }}
-    - source: {{ site.get('template_file', 'salt://apache/config/vhosts/standard.tmpl') }}
+    - source: {{ site.get('template_file', 'salt://apache/config/vhosts/opensuse.tmpl') }}
     - template: {{ apache.get('template_engine', 'jinja') }}
     - makedirs: True
     - context:
