@@ -15,6 +15,7 @@ include:
   - {{ sls_service_running }}
 
   {%- for id, site in salt['pillar.get']('apache:sites', {}).items() %}
+      {%- set site_documentroot = site.get('DocumentRoot') %}
       {%- set documentroot = site.get('DocumentRoot', '{0}/{1}'.format(apache.wwwdir, site.get('ServerName', id))) %}
 
 apache-config-vhosts-standard-{{ id }}:
@@ -32,7 +33,7 @@ apache-config-vhosts-standard-{{ id }}:
     - watch_in:
       - service: apache-service-running
 
-      {%- if site.get('DocumentRoot') != False %}
+      {%- if site_documentroot and site_documentroot not in ['/srv/www/htdocs', '/srv/www/htdocs/'] %}
 
 apache-config-vhosts-standard-{{ id }}-docroot:
   file.directory:
