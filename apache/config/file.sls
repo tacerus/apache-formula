@@ -11,6 +11,7 @@ include:
   - {{ sls_service_running }}
   - {{ sls_package_install }}
 
+{%- if grains.os_family != 'Suse' %}
 apache-config-file-directory-logdir:
   file.directory:
     - name: {{ apache.logdir }}
@@ -97,6 +98,7 @@ apache-config-file-managed:
       - sls: {{ sls_package_install }}
     - context:
         apache: {{ apache | json }}
+{%- endif %} {#- end of big SUSE exclude #}
 
   {%- if grains.os_family in ('Debian', 'FreeBSD') %}
 
@@ -157,7 +159,4 @@ apache-config-file-managed-skip:
     - require:
       - sls: {{ sls_package_install }}
     - watch_in:
-      - module: apache-service-running-restart
-    - require_in:
-      - module: apache-service-running-restart
       - service: apache-service-running

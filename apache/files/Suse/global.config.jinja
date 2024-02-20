@@ -1,4 +1,23 @@
-{%- for directive, dvalue in salt['pillar.get']('apache:global', {}).items() %}
+{{ pillar.get('managed_by_salt', '# Managed by the Apache formula') }}
+{%- set global = salt['pillar.get']('apache:global', {}) -%}
+
+ServerSignature {% if 'ServerSignature' in global -%} {{ global.pop('ServerSignature') }} {%- else -%} off {%- endif %}
+UseCanonicalName {% if 'UseCanonicalName' in global -%} {{ global.pop('UseCanonicalName') }} {%- else -%} off {%- endif %}
+ServerTokens {% if 'ServerTokens' in global -%} {{ global.pop('ServerTokens') }} {%- else -%} ProductOnly {%- endif %}
+LogLevel {% if 'LogLevel' in global -%} {{ global.pop('LogLevel') }} {%- else -%} warn {%- endif %}
+
+{%- if 'SetEnvIfs' in global %}
+{%- for env in global.pop('SetEnvIfs') %}
+SetEnvIf {{ env.attribute }} {{ env.regex }} {{ env.variables }}
+{%- endfor %}
+{%- endif %}
+
+{%- if 'CustomLog' in global %}
+CustomLog {{ global.pop('CustomLog') }}{{ ' ' ~ global.pop('LogFormat') if 'LogFormat' in global else '' }}
+{%- else %}
+CustomLog /var/log/apache2/access_log combined
+{%- endif %}
+
+{%- for directive, dvalue in global.items() %}
 {{ directive }} {{ dvalue }}
 {%- endfor %}
-
