@@ -26,6 +26,8 @@ apache-package-install-pkg-installed:
 
   pkg.installed:
     - name: {{ apache.pkg.name }}
+
+    {%- if grains.os_family != 'Suse' %}
   group.present:
     - name: {{ apache.group }}
     - system: True
@@ -33,5 +35,6 @@ apache-package-install-pkg-installed:
     - name: {{ apache.user }}
     - gid: {{ apache.group }}
     - system: True
+    {%- endif %}
 
     {%- endif %}
