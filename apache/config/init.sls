@@ -10,3 +10,4 @@ include:
   {%- break %}
   {%- endif %}
   {%- endfor %}
+  - .purge
