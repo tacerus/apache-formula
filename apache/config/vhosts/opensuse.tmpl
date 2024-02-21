@@ -44,6 +44,14 @@
     SSLProxyEngine on
     {%- endif %}
 
+    {%- if 'Protocols' in site %}
+    {%- if site.Protocols is string %}
+    Protocols {{ site.Protocols }}
+    {%- elif site.Protocols is iterable %}
+    Protocols {{ ' '.join(site.Protocols) }}
+    {%- endif %}
+    {%- endif %}
+
     {%- if site.get('Rewrite') %}
     RewriteEngine on
     {{ site.Rewrite|indent(4) }}
