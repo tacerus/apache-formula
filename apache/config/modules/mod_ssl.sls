@@ -10,31 +10,24 @@ include:
   - {{ sls_service_running }}
   - {{ sls_package_install }}
 
-    {%- if grains['os_family'] in ('Debian', 'Suse') %}
+    {%- if grains['os_family'] == 'Suse' %}
 
-apache-config-modules-ssl-cmd-run:
+{%- if salt['cmd.retcode']('a2enmod -q ssl') == 1 %}
+extend:
+  apache-service-running:
+    service:
+      - reload: False
+{%- endif %}
+
+apache-config-modules-ssl-pkg:
   cmd.run:
     - name: a2enmod ssl
-    - unless: ls {{ apache.moddir }}/ssl.load || egrep "^APACHE_MODULES=" /etc/sysconfig/apache2 | grep ' ssl'
+    - unless: a2enmod -q ssl
     - order: 225
     - require:
       - pkg: apache-package-install-pkg-installed
     - watch_in:
-      - module: apache-service-running-restart
-    - require_in:
-      - module: apache-service-running-restart
-      - module: apache-service-running-reload
       - service: apache-service-running
-  file.managed:
-    - name: /etc/apache2/mods-available/ssl.conf
-    - source: salt://apache/files/{{ salt['grains.get']('os_family') }}/ssl.conf.jinja
-    - template: {{ apache.get('template_engine', 'jinja') }}
-    - context:
-      apache: {{ apache|json }}
-    - mode: 644
-    - makedirs: True
-    - watch_in:
-      - module: apache-service-running-restart
 
     {%- elif grains['os_family']=="RedHat" %}
 
@@ -100,10 +93,6 @@ apache-config-modules-ssl-file-managed-tls-defaults:
     - require:
       - pkg: apache-package-install-pkg-installed
     - watch_in:
-      - module: apache-service-running-restart
-    - require_in:
-      - module: apache-service-running-restart
-      - module: apache-service-running-reload
       - service: apache-service-running
 
     {%- if grains['os_family'] in ('Debian',) %}
